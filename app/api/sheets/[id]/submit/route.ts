@@ -4,13 +4,14 @@ import { requireUserId } from "@/lib/session";
 import { buildSheetRow } from "@/lib/sheet-template";
 import { getGoogleClientsForUser } from "@/lib/google";
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const userId = await requireUserId();
     const input = await request.json();
 
     const connection = await prisma.sheetConnection.findFirst({
-      where: { id: params.id, userId },
+      where: { id, userId },
       include: { columns: { orderBy: { order: "asc" } } }
     });
     if (!connection) throw new Error("Sheet connection not found");

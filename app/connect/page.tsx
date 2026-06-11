@@ -19,7 +19,7 @@ export default function ConnectPage() {
     const data = await res.json();
     setLoading(null);
     if (!res.ok) return setError(data.error || "Could not create sheet");
-    window.location.href = `/sheet/${data.sheetId}/new`;
+    window.location.href = "/dashboard";
   }
 
   async function connectExisting() {
@@ -34,7 +34,7 @@ export default function ConnectPage() {
     const data = await res.json();
     setLoading(null);
     if (!res.ok) return setError(data.error || "Could not connect sheet");
-    window.location.href = `/sheet/${data.sheetId}/new`;
+    window.location.href = "/dashboard";
   }
 
   return (

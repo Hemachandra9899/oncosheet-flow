@@ -57,5 +57,5 @@ export async function GET(request: NextRequest) {
   });
 
   await createSession(user.id);
-  return NextResponse.redirect(new URL("/connect", request.url));
+  return NextResponse.redirect(new URL("/dashboard", request.url));
 }

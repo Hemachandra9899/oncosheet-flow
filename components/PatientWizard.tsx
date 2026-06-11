@@ -13,8 +13,8 @@ type Step =
   | { id: string; label: string; title: string; type: "review" };
 
 const steps: Step[] = [
-  { id: "patientName", label: "Patient", title: "Patient name", type: "text", placeholder: "Enter patient name" },
   { id: "patientId", label: "Patient", title: "Patient ID", type: "text", placeholder: "25-05976" },
+  { id: "patientName", label: "Patient", title: "Patient name", type: "text", placeholder: "Enter patient name" },
   { id: "age", label: "Patient", title: "Age", type: "number", placeholder: "50" },
   { id: "sex", label: "Patient", title: "Sex", type: "choice", options: ["Male", "Female"] },
   { id: "primarySite", label: "Diagnosis", title: "Primary site", type: "choice", options: ["Ca Hypopharynx", "Ca Tongue", "Ca Bm", "Ca Oropharynx", "Ca Nasopharynx", "Ca Post Cricoid", "Other"] },
@@ -45,6 +45,7 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
   const [values, setValues] = useState<Record<string, any>>({});
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [mode, setMode] = useState<"append" | "update">("append");
 
   const step = steps[index];
   const progress = Math.round(((index + 1) / steps.length) * 100);
@@ -78,6 +79,11 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
   }
 
   async function submit() {
+    if (mode === "update") {
+      setError("Update existing row is coming next. For now, use Append new row.");
+      setSubmitting(false);
+      return;
+    }
     setSubmitting(true);
     setError("");
     const res = await fetch(`/api/sheets/${sheetId}/submit`, {
@@ -226,9 +232,36 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
         </FieldShell>
       ) : null}
 
+      {step.type === "review" ? (
+        <div className="mt-5 grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => setMode("append")}
+            className={`rounded-2xl px-4 py-3 text-sm font-black transition ${
+              mode === "append"
+                ? "bg-slate-950 text-white"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+          >
+            Append new row
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("update")}
+            className={`rounded-2xl px-4 py-3 text-sm font-black transition ${
+              mode === "update"
+                ? "bg-indigo-600 text-white"
+                : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+            }`}
+          >
+            Update existing
+          </button>
+        </div>
+      ) : null}
+
       {error ? <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p> : null}
 
-      <div className="mt-12 flex items-center justify-between">
+      <div className="mt-5 flex items-center justify-between">
         <button
           type="button"
           onClick={back}

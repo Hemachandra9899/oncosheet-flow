@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { cookies } from "next/headers";
 
 const SESSION_COOKIE = "opensheet_session";
+const LEGACY_SESSION_COOKIE = "oncosheet_session";
 const OAUTH_STATE_COOKIE = "opensheet_oauth_state";
 
 function secret() {
@@ -28,10 +29,16 @@ export async function createSession(userId: string) {
 
 export async function getUserIdFromSession() {
   const store = await cookies();
-  const token = store.get(SESSION_COOKIE)?.value;
+
+  const token =
+    store.get(SESSION_COOKIE)?.value ||
+    store.get(LEGACY_SESSION_COOKIE)?.value;
+
   if (!token) return null;
+
   const [userId, signature] = token.split(".");
   if (!userId || !signature) return null;
+
   return sign(userId) === signature ? userId : null;
 }
 
@@ -63,5 +70,7 @@ export async function verifyOAuthState(state: string | null) {
 
 export async function clearSession() {
   const store = await cookies();
+
   store.delete(SESSION_COOKIE);
+  store.delete(LEGACY_SESSION_COOKIE);
 }

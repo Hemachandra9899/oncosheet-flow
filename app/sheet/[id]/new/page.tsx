@@ -1,12 +1,16 @@
 import PatientWizard from "@/components/PatientWizard";
 
-export default function NewPatientPage({ params }: { params: { id: string } }) {
+export default async function NewPatientPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
   return (
-    <main className="flex min-h-screen items-center justify-center px-5 py-8">
-      <div className="w-full max-w-6xl rounded-[2rem] bg-white/70 p-4 shadow-soft ring-1 ring-white backdrop-blur">
-        <div className="flex min-h-[720px] items-center justify-center rounded-[1.6rem] bg-gradient-to-br from-indigo-100 via-white to-lime-100 p-6">
-          <PatientWizard sheetId={params.id} />
-        </div>
+    <main className="min-h-dvh bg-gradient-to-br from-indigo-50 via-white to-lime-50 sm:flex sm:items-center sm:justify-center sm:px-4 sm:py-6">
+      <div className="w-full sm:max-w-md">
+        <PatientWizard sheetId={id} />
       </div>
     </main>
   );

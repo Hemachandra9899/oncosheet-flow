@@ -100,7 +100,7 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
   }
 
   return (
-    <div className="w-full max-w-[460px] rounded-[1.4rem] bg-white/95 p-7 shadow-soft ring-1 ring-slate-100 md:p-8">
+    <div className="flex min-h-dvh w-full flex-col bg-white px-4 py-5 shadow-none sm:min-h-0 sm:rounded-[1.5rem] sm:bg-white/95 sm:p-6 sm:shadow-soft sm:ring-1 sm:ring-slate-100">
       <div className="flex items-center gap-3">
         <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200">
           <div className="h-full rounded-full bg-indigo-600 transition-all" style={{ width: `${progress}%` }} />
@@ -110,10 +110,12 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
         </button>
       </div>
 
-      <p className="mt-12 text-xs font-bold uppercase tracking-widest text-slate-400">
+      <p className="mt-8 text-[11px] font-bold uppercase tracking-widest text-slate-400 sm:mt-10">
         Question {index + 1} · {step.label}
       </p>
-      <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-950">{step.title}</h1>
+      <h1 className="mt-2 text-[1.7rem] font-black leading-tight tracking-tight text-slate-950 sm:text-2xl">
+        {step.title}
+      </h1>
 
       {step.type === "text" || step.type === "number" || step.type === "date" ? (
         <FieldShell>
@@ -122,7 +124,7 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
             value={values[step.id] || ""}
             onChange={(e) => update(step.id, e.target.value)}
             placeholder={step.placeholder}
-            className="focus-ring w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-base font-semibold text-slate-900 shadow-sm"
+            className="focus-ring w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-[16px] font-semibold text-slate-900 shadow-sm"
           />
         </FieldShell>
       ) : null}
@@ -134,7 +136,7 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
             onChange={(e) => update(step.id, e.target.value)}
             placeholder={step.placeholder}
             rows={5}
-            className="focus-ring w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-4 text-base font-semibold text-slate-900 shadow-sm"
+            className="focus-ring w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-[16px] font-semibold text-slate-900 shadow-sm"
           />
         </FieldShell>
       ) : null}
@@ -150,7 +152,7 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
             <input
               autoFocus
               placeholder="Type custom value"
-              className="focus-ring w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-base font-semibold text-slate-900 shadow-sm"
+              className="focus-ring w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-[16px] font-semibold text-slate-900 shadow-sm"
               onChange={(e) => update(step.id, e.target.value)}
             />
           ) : null}
@@ -175,14 +177,14 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
               value={values.preRtWeightKg || ""}
               onChange={(e) => update("preRtWeightKg", e.target.value)}
               placeholder="Weight kg"
-              className="focus-ring rounded-2xl border border-slate-200 bg-white px-4 py-4 text-base font-semibold text-slate-900 shadow-sm"
+              className="focus-ring rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-[16px] font-semibold text-slate-900 shadow-sm"
             />
             <input
               type="number"
               value={values.heightCm || ""}
               onChange={(e) => update("heightCm", e.target.value)}
               placeholder="Height cm"
-              className="focus-ring rounded-2xl border border-slate-200 bg-white px-4 py-4 text-base font-semibold text-slate-900 shadow-sm"
+              className="focus-ring rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-[16px] font-semibold text-slate-900 shadow-sm"
             />
           </div>
           <div className="rounded-2xl bg-indigo-50 p-4 ring-1 ring-indigo-100">
@@ -200,7 +202,7 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
             value={values.postRtWeightKg || ""}
             onChange={(e) => update("postRtWeightKg", e.target.value)}
             placeholder="Post RT weight kg"
-            className="focus-ring w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-base font-semibold text-slate-900 shadow-sm"
+            className="focus-ring w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-[16px] font-semibold text-slate-900 shadow-sm"
           />
           <div className="rounded-2xl bg-lime-50 p-4 ring-1 ring-lime-100">
             <p className="text-xs font-bold uppercase tracking-widest text-lime-600">Auto calculated</p>
@@ -261,7 +263,7 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
 
       {error ? <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p> : null}
 
-      <div className="mt-5 flex items-center justify-between">
+      <div className="sticky bottom-0 -mx-4 mt-auto flex items-center justify-between border-t border-slate-100 bg-white/95 px-4 py-4 backdrop-blur sm:static sm:mx-0 sm:mt-10 sm:border-t-0 sm:bg-transparent sm:px-0 sm:py-0">
         <button
           type="button"
           onClick={back}

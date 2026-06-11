@@ -1,8 +1,8 @@
 import crypto from "crypto";
 import { cookies } from "next/headers";
 
-const SESSION_COOKIE = "oncosheet_session";
-const OAUTH_STATE_COOKIE = "oncosheet_oauth_state";
+const SESSION_COOKIE = "opensheet_session";
+const OAUTH_STATE_COOKIE = "opensheet_oauth_state";
 
 function secret() {
   const value = process.env.SESSION_SECRET;
@@ -59,4 +59,9 @@ export async function verifyOAuthState(state: string | null) {
   const saved = store.get(OAUTH_STATE_COOKIE)?.value;
   store.delete(OAUTH_STATE_COOKIE);
   return Boolean(state && saved && state === saved);
+}
+
+export async function clearSession() {
+  const store = await cookies();
+  store.delete(SESSION_COOKIE);
 }

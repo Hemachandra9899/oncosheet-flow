@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
   try {
     const userId = await requireUserId();
     const body = await request.json().catch(() => ({}));
-    const title = body.title || `OncoSheet Flow - Patients`;
+    const title = body.title || `OpenSheet Flow - Patients`;
     const sheetName = body.sheetName || "Patients";
     const { sheets } = await getGoogleClientsForUser(userId);
 

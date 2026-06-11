@@ -14,7 +14,7 @@ export default function ConnectPage() {
     const res = await fetch("/api/sheets/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: "OncoSheet Flow - Patients", sheetName: "Patients" })
+      body: JSON.stringify({ title: "OpenSheet Flow - Patients", sheetName: "Patients" })
     });
     const data = await res.json();
     setLoading(null);

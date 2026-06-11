@@ -38,6 +38,21 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const row = buildSheetRow(input, headers, nextSerialNo);
 
+    if (row.length !== headers.length) {
+      throw new Error(
+        `Row verification failed. Expected ${headers.length} cells but got ${row.length}.`
+      );
+    }
+
+    const missingRequired = ["Patient ID", "Patient Name"].filter((header) => {
+      const index = headers.indexOf(header);
+      return index === -1 || !String(row[index] || "").trim();
+    });
+
+    if (missingRequired.length > 0) {
+      throw new Error(`Missing required fields: ${missingRequired.join(", ")}`);
+    }
+
     const appendResult = await sheets.spreadsheets.values.append({
       spreadsheetId: connection.spreadsheetId,
       range: `${safeSheetName}!A:ZZ`,

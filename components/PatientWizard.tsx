@@ -36,6 +36,30 @@ const steps: Step[] = [
   { id: "review", label: "Review", title: "Review patient row", type: "review" }
 ];
 
+const REVIEW_FIELDS = [
+  ["patientId", "Patient ID"],
+  ["patientName", "Patient Name"],
+  ["age", "Age"],
+  ["sex", "Sex"],
+  ["primarySite", "Primary Site"],
+  ["stage", "Stage"],
+  ["ecog", "ECOG"],
+  ["preRtWeightKg", "Pre RT Weight(kg)"],
+  ["heightCm", "Height(cm)"],
+  ["rtStarted", "RT Started"],
+  ["rtDoseGy", "RT Dose(Gy)"],
+  ["rtTech", "RT Tech"],
+  ["rtEnded", "RT Ended"],
+  ["cctCycles", "CCT Cycles"],
+  ["ryles", "Ryles"],
+  ["postRtMucositis", "Post RT Mucositis"],
+  ["postRtDermatitis", "Post RT Dermatitis"],
+  ["postRtDys", "Post RT Dys"],
+  ["postRtWeightKg", "Post RT Weight(kg)"],
+  ["treatmentInterruptions", "Treatment Interruptions"],
+  ["notes", "Notes"],
+] as const;
+
 function FieldShell({ children }: { children: React.ReactNode }) {
   return <div className="mt-7 space-y-4">{children}</div>;
 }
@@ -75,6 +99,11 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
 
   function choose(key: string, value: string) {
     update(key, value);
+
+    if (value === "Other") {
+      return;
+    }
+
     window.setTimeout(next, 120);
   }
 
@@ -100,10 +129,10 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
   }
 
   return (
-    <div className="flex min-h-dvh w-full flex-col bg-white px-4 py-5 shadow-none sm:min-h-0 sm:rounded-[1.5rem] sm:bg-white/95 sm:p-6 sm:shadow-soft sm:ring-1 sm:ring-slate-100">
+    <div className="flex min-h-dvh w-full flex-col bg-[#F7F5EF] px-4 py-5 text-[#071B1A] shadow-none sm:min-h-0 sm:rounded-[2rem] sm:bg-white sm:p-6 sm:shadow-sm sm:ring-1 sm:ring-slate-200">
       <div className="flex items-center gap-3">
         <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200">
-          <div className="h-full rounded-full bg-indigo-600 transition-all" style={{ width: `${progress}%` }} />
+          <div className="h-full rounded-full bg-[#062E2B] transition-all" style={{ width: `${progress}%` }} />
         </div>
         <button className="rounded-full bg-slate-100 p-2 text-slate-400 hover:text-slate-700" type="button" aria-label="Close">
           <X className="h-4 w-4" />
@@ -113,7 +142,7 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
       <p className="mt-8 text-[11px] font-bold uppercase tracking-widest text-slate-400 sm:mt-10">
         Question {index + 1} · {step.label}
       </p>
-      <h1 className="mt-2 text-[1.7rem] font-black leading-tight tracking-tight text-slate-950 sm:text-2xl">
+      <h1 className="mt-2 text-[2.2rem] font-black leading-[0.95] tracking-[-0.05em] text-[#07071E] sm:text-4xl">
         {step.title}
       </h1>
 
@@ -124,7 +153,7 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
             value={values[step.id] || ""}
             onChange={(e) => update(step.id, e.target.value)}
             placeholder={step.placeholder}
-            className="focus-ring w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-[16px] font-semibold text-slate-900 shadow-sm"
+            className="focus-ring w-full rounded-[1.4rem] border-0 bg-white px-4 py-5 text-[16px] font-black text-slate-900 shadow-sm outline-none ring-1 ring-slate-200"
           />
         </FieldShell>
       ) : null}
@@ -136,7 +165,7 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
             onChange={(e) => update(step.id, e.target.value)}
             placeholder={step.placeholder}
             rows={5}
-            className="focus-ring w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-[16px] font-semibold text-slate-900 shadow-sm"
+            className="focus-ring w-full resize-none rounded-[1.4rem] border-0 bg-white px-4 py-5 text-[16px] font-black text-slate-900 shadow-sm outline-none ring-1 ring-slate-200"
           />
         </FieldShell>
       ) : null}
@@ -152,7 +181,7 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
             <input
               autoFocus
               placeholder="Type custom value"
-              className="focus-ring w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-[16px] font-semibold text-slate-900 shadow-sm"
+              className="focus-ring w-full rounded-[1.4rem] border-0 bg-white px-4 py-5 text-[16px] font-black text-slate-900 shadow-sm outline-none ring-1 ring-slate-200"
               onChange={(e) => update(step.id, e.target.value)}
             />
           ) : null}
@@ -177,17 +206,17 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
               value={values.preRtWeightKg || ""}
               onChange={(e) => update("preRtWeightKg", e.target.value)}
               placeholder="Weight kg"
-              className="focus-ring rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-[16px] font-semibold text-slate-900 shadow-sm"
+              className="focus-ring rounded-[1.4rem] border-0 bg-white px-4 py-5 text-[16px] font-black text-slate-900 shadow-sm outline-none ring-1 ring-slate-200"
             />
             <input
               type="number"
               value={values.heightCm || ""}
               onChange={(e) => update("heightCm", e.target.value)}
               placeholder="Height cm"
-              className="focus-ring rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-[16px] font-semibold text-slate-900 shadow-sm"
+              className="focus-ring rounded-[1.4rem] border-0 bg-white px-4 py-5 text-[16px] font-black text-slate-900 shadow-sm outline-none ring-1 ring-slate-200"
             />
           </div>
-          <div className="rounded-2xl bg-indigo-50 p-4 ring-1 ring-indigo-100">
+          <div className="rounded-[1.4rem] bg-white p-4 ring-1 ring-indigo-100">
             <p className="text-xs font-bold uppercase tracking-widest text-indigo-400">Auto calculated</p>
             <p className="mt-2 text-2xl font-bold text-indigo-700">BMI: {preBmi ?? "—"}</p>
             <p className="mt-1 text-sm font-semibold text-indigo-600">{getBMIGroup(preBmi)}</p>
@@ -202,9 +231,9 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
             value={values.postRtWeightKg || ""}
             onChange={(e) => update("postRtWeightKg", e.target.value)}
             placeholder="Post RT weight kg"
-            className="focus-ring w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-[16px] font-semibold text-slate-900 shadow-sm"
+            className="focus-ring w-full rounded-[1.4rem] border-0 bg-white px-4 py-5 text-[16px] font-black text-slate-900 shadow-sm outline-none ring-1 ring-slate-200"
           />
-          <div className="rounded-2xl bg-lime-50 p-4 ring-1 ring-lime-100">
+          <div className="rounded-[1.4rem] bg-lime-50 p-4 ring-1 ring-lime-100">
             <p className="text-xs font-bold uppercase tracking-widest text-lime-600">Auto calculated</p>
             <p className="mt-2 text-2xl font-bold text-lime-700">Post RT BMI: {postBmi ?? "—"}</p>
           </div>
@@ -213,14 +242,19 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
 
       {step.type === "review" ? (
         <FieldShell>
-          <div className="max-h-72 overflow-auto rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
+          <div className="max-h-72 overflow-auto rounded-[1.4rem] bg-white p-4 ring-1 ring-slate-200">
             <dl className="space-y-3 text-sm">
-              {Object.entries(values).map(([key, value]) => (
-                <div key={key} className="flex justify-between gap-4 border-b border-slate-200/70 pb-2 last:border-b-0">
-                  <dt className="font-semibold text-slate-500">{key}</dt>
-                  <dd className="text-right font-bold text-slate-900">{String(value || "—")}</dd>
-                </div>
-              ))}
+              {REVIEW_FIELDS.map(([key, label]) => {
+                const value = values[key];
+                return (
+                  <div key={key} className="flex justify-between gap-4 border-b border-slate-200/70 pb-2 last:border-b-0">
+                    <dt className="font-semibold text-slate-500">{label}</dt>
+                    <dd className="text-right font-bold text-slate-900">
+                      {String(value ?? "—")}
+                    </dd>
+                  </div>
+                );
+              })}
               <div className="flex justify-between gap-4 border-b border-slate-200/70 pb-2">
                 <dt className="font-semibold text-slate-500">Pre RT BMI</dt>
                 <dd className="text-right font-bold text-slate-900">{preBmi ?? "—"}</dd>
@@ -263,12 +297,12 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
 
       {error ? <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p> : null}
 
-      <div className="sticky bottom-0 -mx-4 mt-auto flex items-center justify-between border-t border-slate-100 bg-white/95 px-4 py-4 backdrop-blur sm:static sm:mx-0 sm:mt-10 sm:border-t-0 sm:bg-transparent sm:px-0 sm:py-0">
+      <div className="sticky bottom-0 -mx-4 mt-auto flex items-center justify-between border-t border-slate-200 bg-[#F7F5EF]/95 px-4 py-4 backdrop-blur sm:static sm:mx-0 sm:mt-10 sm:border-t-0 sm:bg-transparent sm:px-0 sm:py-0">
         <button
           type="button"
           onClick={back}
           disabled={index === 0}
-          className="inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"
+          className="inline-flex min-h-[52px] items-center gap-2 rounded-full px-4 text-sm font-black text-slate-400 transition hover:bg-white hover:text-slate-700 disabled:opacity-40"
         >
           <ArrowLeft className="h-4 w-4" /> Back
         </button>
@@ -278,7 +312,7 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
             type="button"
             onClick={submit}
             disabled={submitting}
-            className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-7 py-4 text-sm font-bold text-white shadow-lg shadow-emerald-100 transition hover:bg-emerald-500 disabled:opacity-60"
+            className="inline-flex min-h-[56px] items-center gap-2 rounded-full bg-emerald-600 px-8 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-500 disabled:opacity-60"
           >
             {submitting ? "Submitting..." : "Submit"} <Check className="h-4 w-4" />
           </button>
@@ -286,7 +320,7 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
           <button
             type="button"
             onClick={next}
-            className="inline-flex items-center gap-2 rounded-2xl bg-indigo-600 px-7 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-100 transition hover:bg-indigo-500"
+            className="inline-flex min-h-[56px] items-center gap-2 rounded-full bg-[#062E2B] px-8 text-sm font-black text-white shadow-sm transition active:scale-[0.98]"
           >
             Next <ArrowRight className="h-4 w-4" />
           </button>

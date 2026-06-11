@@ -1,56 +1,84 @@
+import { redirect } from "next/navigation";
 import { ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
+import { getUserIdFromSession } from "@/lib/session";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const userId = await getUserIdFromSession();
+
+  if (userId) {
+    redirect("/dashboard");
+  }
+
   return (
-    <main className="min-h-screen px-5 py-8 md:px-8">
+    <main className="min-h-dvh bg-[#F7F5EF] px-4 py-5 text-[#071B1A] sm:px-8 sm:py-8">
       <nav className="mx-auto flex max-w-6xl items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-soft">O</div>
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#062E2B] text-sm font-black text-white">
+            O
+          </div>
           <div>
-            <p className="text-sm font-semibold text-slate-950">OncoSheet Flow</p>
-            <p className="text-xs text-slate-500">Google Sheets automation</p>
+            <p className="text-base font-black tracking-tight">OpenSheet</p>
+            <p className="text-xs font-semibold text-slate-500">
+              Sheets automation
+            </p>
           </div>
         </div>
       </nav>
 
-      <section className="mx-auto mt-16 grid max-w-6xl items-center gap-10 md:grid-cols-[1fr_440px]">
+      <section className="mx-auto grid max-w-6xl gap-8 pt-12 sm:pt-16 lg:grid-cols-[1fr_430px] lg:items-center">
         <div>
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm ring-1 ring-slate-200 backdrop-blur">
-            <Sparkles className="h-4 w-4" /> Click-first patient data entry
+          <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm">
+            <Sparkles className="h-4 w-4" />
+            Click-first data entry
           </div>
-          <h1 className="max-w-3xl text-5xl font-bold tracking-tight text-slate-950 md:text-7xl">
-            Fill oncology sheets without fighting spreadsheets.
+
+          <h1 className="mt-6 max-w-3xl text-[4.2rem] font-black leading-[0.88] tracking-[-0.07em] text-[#07071E] sm:text-7xl lg:text-8xl">
+            Always keep sheets clean.
           </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
-            Connect Google Sheets, answer one clean question at a time, auto-calculate BMI, then append the final patient row instantly.
+
+          <p className="mt-6 max-w-xl text-base font-medium leading-7 text-slate-600 sm:text-lg">
+            Connect Google Sheets, fill one clean step at a time, review every
+            value, and append the final row safely.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+
+          <div className="mt-8 grid gap-3 sm:max-w-sm">
             <a
               href="/api/google/start"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-6 py-4 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-slate-800"
+              className="inline-flex min-h-[58px] items-center justify-center gap-2 rounded-full bg-[#062E2B] px-6 py-4 text-sm font-black text-white shadow-lg shadow-emerald-950/10 transition active:scale-[0.98]"
             >
-              Continue with Google <ArrowRight className="h-4 w-4" />
+              Continue with Google
+              <ArrowRight className="h-4 w-4" />
             </a>
-            <div className="inline-flex items-center gap-2 rounded-2xl bg-white/70 px-5 py-4 text-sm font-medium text-slate-600 ring-1 ring-slate-200">
-              <ShieldCheck className="h-4 w-4" /> Your patient rows stay in your Google Sheet
+
+            <div className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-4 text-sm font-bold text-slate-600 shadow-sm">
+              <ShieldCheck className="h-4 w-4" />
+              Rows stay in your Google Sheet
             </div>
           </div>
         </div>
 
-        <div className="rounded-[2rem] bg-white/80 p-5 shadow-soft ring-1 ring-white backdrop-blur">
-          <div className="rounded-[1.5rem] bg-gradient-to-br from-indigo-100 via-white to-lime-100 p-8">
-            <div className="mx-auto min-h-[460px] rounded-[1.4rem] bg-white/90 p-8 shadow-soft ring-1 ring-slate-100">
-              <div className="flex items-center gap-2">
-                <div className="h-2 w-20 rounded-full bg-indigo-500" />
-                <div className="h-2 flex-1 rounded-full bg-slate-200" />
-              </div>
-              <p className="mt-14 text-xs font-bold uppercase tracking-widest text-slate-400">Question 1</p>
-              <h2 className="mt-3 text-2xl font-bold text-slate-950">Patient name</h2>
-              <div className="mt-7 rounded-2xl border border-slate-200 bg-white px-4 py-4 font-medium text-slate-700 shadow-sm">Shashidar</div>
-              <div className="mt-36 flex items-center justify-end gap-3">
-                <span className="text-sm font-semibold text-slate-300">Back</span>
-                <span className="rounded-2xl bg-indigo-600 px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-indigo-200">Next</span>
-              </div>
+        <div className="rounded-[2rem] bg-[#BDEAF3] p-4 shadow-sm">
+          <div className="rounded-[1.6rem] bg-white/90 p-6 shadow-sm">
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-20 rounded-full bg-[#062E2B]" />
+              <div className="h-2 flex-1 rounded-full bg-slate-200" />
+            </div>
+
+            <p className="mt-14 text-xs font-black uppercase tracking-widest text-slate-400">
+              Question 1
+            </p>
+            <h2 className="mt-3 text-4xl font-black tracking-tight">
+              Patient ID
+            </h2>
+
+            <div className="mt-7 rounded-3xl bg-white px-5 py-5 text-[16px] font-black text-slate-700 shadow-sm ring-1 ring-slate-200">
+              25-05976
+            </div>
+
+            <div className="mt-32 flex justify-end">
+              <span className="rounded-full bg-[#062E2B] px-8 py-4 text-sm font-black text-white">
+                Next
+              </span>
             </div>
           </div>
         </div>

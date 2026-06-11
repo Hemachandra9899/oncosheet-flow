@@ -37,7 +37,7 @@ export default function DashboardClient({
   const [sheetName, setSheetName] = useState("Patients");
   const [error, setError] = useState("");
   const [existingUrl, setExistingUrl] = useState("");
-  const [existingTabName, setExistingTabName] = useState("Patients");
+
   const [connectLoading, setConnectLoading] = useState(false);
 
   async function createSheet() {
@@ -79,7 +79,6 @@ export default function DashboardClient({
       },
       body: JSON.stringify({
         spreadsheetUrl: existingUrl,
-        sheetName: existingTabName || "Patients",
       }),
     });
 
@@ -179,13 +178,6 @@ export default function DashboardClient({
                     value={existingUrl}
                     onChange={(e) => setExistingUrl(e.target.value)}
                     placeholder="Paste Google Sheet URL"
-                    className="mt-3 w-full rounded-2xl border border-white/10 bg-white/95 px-4 py-3 text-[16px] font-bold text-slate-950 outline-none"
-                  />
-
-                  <input
-                    value={existingTabName}
-                    onChange={(e) => setExistingTabName(e.target.value)}
-                    placeholder="Tab name, e.g. Patients"
                     className="mt-3 w-full rounded-2xl border border-white/10 bg-white/95 px-4 py-3 text-[16px] font-bold text-slate-950 outline-none"
                   />
 

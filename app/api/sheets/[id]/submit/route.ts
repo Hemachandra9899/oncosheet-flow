@@ -4,6 +4,10 @@ import { requireUserId } from "@/lib/session";
 import { buildSheetRow } from "@/lib/sheet-template";
 import { getGoogleClientsForUser } from "@/lib/google";
 
+function quoteSheetName(name: string) {
+  return `'${name.replace(/'/g, "''")}'`;
+}
+
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
@@ -17,15 +21,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (!connection) throw new Error("Sheet connection not found");
 
     const { sheets } = await getGoogleClientsForUser(userId);
+    const safeSheetName = quoteSheetName(connection.sheetName);
+
     const headersResult = await sheets.spreadsheets.values.get({
       spreadsheetId: connection.spreadsheetId,
-      range: `${connection.sheetName}!1:1`
+      range: `${safeSheetName}!1:1`
     });
     const headers = (headersResult.data.values?.[0] || []).map(String);
 
     const serialResult = await sheets.spreadsheets.values.get({
       spreadsheetId: connection.spreadsheetId,
-      range: `${connection.sheetName}!A:A`
+      range: `${safeSheetName}!A:A`
     });
     const usedRows = serialResult.data.values?.length || 1;
     const nextSerialNo = usedRows; // header row + N rows => next S.no = N + 1 = usedRows
@@ -34,7 +40,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const appendResult = await sheets.spreadsheets.values.append({
       spreadsheetId: connection.spreadsheetId,
-      range: `${connection.sheetName}!A:ZZ`,
+      range: `${safeSheetName}!A:ZZ`,
       valueInputOption: "USER_ENTERED",
       insertDataOption: "INSERT_ROWS",
       requestBody: { values: [row] }

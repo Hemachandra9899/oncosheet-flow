@@ -65,6 +65,7 @@ model SheetConnection {
   records PatientRecord[]
 
   @@index([userId])
+  @@unique([userId, spreadsheetId, sheetName])
 }
 
 model SheetColumn {

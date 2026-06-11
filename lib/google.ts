@@ -6,7 +6,8 @@ export const GOOGLE_SCOPES = [
   "openid",
   "email",
   "profile",
-  "https://www.googleapis.com/auth/drive.file"
+  "https://www.googleapis.com/auth/drive.file",
+  "https://www.googleapis.com/auth/spreadsheets",
 ];
 
 export function getOAuthClient() {
@@ -33,6 +34,11 @@ export async function getGoogleClientsForUser(userId: string) {
     sheets: google.sheets({ version: "v4", auth }),
     drive: google.drive({ version: "v3", auth })
   };
+}
+
+export function extractSheetGid(input: string) {
+  const match = input.match(/[?&#]gid=(\d+)/);
+  return match ? Number(match[1]) : null;
 }
 
 export function extractSpreadsheetId(input: string) {

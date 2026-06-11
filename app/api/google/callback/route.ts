@@ -5,14 +5,22 @@ import { encryptText } from "@/lib/crypto";
 import { createSession, verifyOAuthState } from "@/lib/session";
 import { getOAuthClient } from "@/lib/google";
 
+function appUrl(path: string) {
+  const baseUrl = process.env.APP_URL;
+  return new URL(path, baseUrl);
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get("code");
   const state = searchParams.get("state");
 
-  if (!code) return NextResponse.redirect(new URL("/?error=missing_code", request.url));
+  if (!code) {
+    return NextResponse.redirect(appUrl("/?error=missing_code"));
+  }
+
   if (!(await verifyOAuthState(state))) {
-    return NextResponse.redirect(new URL("/?error=bad_oauth_state", request.url));
+    return NextResponse.redirect(appUrl("/?error=bad_oauth_state"));
   }
 
   const oauth2Client = getOAuthClient();
@@ -21,41 +29,65 @@ export async function GET(request: NextRequest) {
 
   const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
   const userInfo = await oauth2.userinfo.get();
+
   const email = userInfo.data.email;
-  if (!email) return NextResponse.redirect(new URL("/?error=no_google_email", request.url));
+  if (!email) {
+    return NextResponse.redirect(appUrl("/?error=no_google_email"));
+  }
 
   const user = await prisma.user.upsert({
     where: { email },
-    update: { name: userInfo.data.name, image: userInfo.data.picture },
-    create: { email, name: userInfo.data.name, image: userInfo.data.picture }
+    update: {
+      name: userInfo.data.name,
+      image: userInfo.data.picture,
+    },
+    create: {
+      email,
+      name: userInfo.data.name,
+      image: userInfo.data.picture,
+    },
   });
 
-  const existing = await prisma.googleAccount.findUnique({ where: { userId: user.id } });
+  const existing = await prisma.googleAccount.findUnique({
+    where: { userId: user.id },
+  });
+
   const refreshToken = tokens.refresh_token || (existing ? undefined : null);
 
   if (!refreshToken && !existing) {
-    return NextResponse.redirect(new URL("/?error=no_refresh_token", request.url));
+    return NextResponse.redirect(appUrl("/?error=no_refresh_token"));
   }
 
   await prisma.googleAccount.upsert({
     where: { userId: user.id },
     update: {
       googleEmail: email,
-      encryptedRefreshToken: refreshToken ? encryptText(refreshToken) : existing!.encryptedRefreshToken,
-      encryptedAccessToken: tokens.access_token ? encryptText(tokens.access_token) : undefined,
-      accessTokenExpiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
-      scopes: tokens.scope || ""
+      encryptedRefreshToken: refreshToken
+        ? encryptText(refreshToken)
+        : existing!.encryptedRefreshToken,
+      encryptedAccessToken: tokens.access_token
+        ? encryptText(tokens.access_token)
+        : undefined,
+      accessTokenExpiresAt: tokens.expiry_date
+        ? new Date(tokens.expiry_date)
+        : undefined,
+      scopes: tokens.scope || "",
     },
     create: {
       userId: user.id,
       googleEmail: email,
       encryptedRefreshToken: encryptText(refreshToken!),
-      encryptedAccessToken: tokens.access_token ? encryptText(tokens.access_token) : undefined,
-      accessTokenExpiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : undefined,
-      scopes: tokens.scope || ""
-    }
+      encryptedAccessToken: tokens.access_token
+        ? encryptText(tokens.access_token)
+        : undefined,
+      accessTokenExpiresAt: tokens.expiry_date
+        ? new Date(tokens.expiry_date)
+        : undefined,
+      scopes: tokens.scope || "",
+    },
   });
 
   await createSession(user.id);
-  return NextResponse.redirect(new URL("/dashboard", request.url));
+
+  return NextResponse.redirect(appUrl("/dashboard"));
 }

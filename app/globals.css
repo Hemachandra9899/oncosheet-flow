@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #f8f7ff;
+  --color-ink: #111827;
+  --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  color: var(--color-ink);
+  background:
+    radial-gradient(circle at 10% 10%, rgba(238, 224, 255, 0.95), transparent 35%),
+    radial-gradient(circle at 92% 18%, rgba(236, 255, 211, 0.95), transparent 34%),
+    radial-gradient(circle at 10% 88%, rgba(255, 221, 232, 0.85), transparent 30%),
+    #fafafa;
+}
+
+@utility focus-ring {
+  @apply focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400;
+}

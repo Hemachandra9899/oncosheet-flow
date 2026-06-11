@@ -67,34 +67,44 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const connection = await prisma.sheetConnection.upsert({
+    let connection = await prisma.sheetConnection.findFirst({
       where: {
-        userId_spreadsheetId_sheetName: {
-          userId,
-          spreadsheetId,
-          sheetName,
-        },
-      },
-      update: {
-        spreadsheetName,
-      },
-      create: {
         userId,
         spreadsheetId,
-        spreadsheetName,
         sheetName,
-        columns: {
-          create: DEFAULT_COLUMNS.map((column, index) => ({
-            key: column.key,
-            label: column.label,
-            type: column.type,
-            required: column.required,
-            order: index,
-            isDefault: true,
-          })),
-        },
       },
     });
+
+    if (connection) {
+      connection = await prisma.sheetConnection.update({
+        where: {
+          id: connection.id,
+        },
+        data: {
+          spreadsheetName,
+          sheetName,
+        },
+      });
+    } else {
+      connection = await prisma.sheetConnection.create({
+        data: {
+          userId,
+          spreadsheetId,
+          spreadsheetName,
+          sheetName,
+          columns: {
+            create: DEFAULT_COLUMNS.map((column, index) => ({
+              key: column.key,
+              label: column.label,
+              type: column.type,
+              required: column.required,
+              order: index,
+              isDefault: true,
+            })),
+          },
+        },
+      });
+    }
 
     return NextResponse.json({
       sheetId: connection.id,

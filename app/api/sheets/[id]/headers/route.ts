@@ -33,7 +33,7 @@ export async function GET(
 
     return NextResponse.json({
       headers: (result.data.values?.[0] || []).map(String),
-      templateKey: connection.templateKey || "oncology_rt",
+      templateKey: connection.templateKey || "sheet_columns",
       spreadsheetName: connection.spreadsheetName,
       sheetName: connection.sheetName,
     });

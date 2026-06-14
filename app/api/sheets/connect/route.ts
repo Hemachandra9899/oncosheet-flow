@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ColumnType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/session";
-import { mergeHeaders } from "@/lib/sheet-template";
-import { getTemplate } from "@/lib/templates";
 import {
   extractSpreadsheetId,
   extractSheetGid,
@@ -18,9 +15,6 @@ export async function POST(request: NextRequest) {
   try {
     const userId = await requireUserId();
     const body = await request.json();
-
-    const templateKey = body.templateKey || "oncology_rt";
-    const template = getTemplate(templateKey);
 
     const spreadsheetUrl = body.spreadsheetUrl || body.spreadsheetId || "";
     const spreadsheetId = extractSpreadsheetId(spreadsheetUrl);
@@ -61,16 +55,12 @@ export async function POST(request: NextRequest) {
     });
 
     const existingHeaders = (headerResult.data.values?.[0] || []).map(String);
-    const mergedHeaders = mergeHeaders(existingHeaders, templateKey);
 
-    await sheets.spreadsheets.values.update({
-      spreadsheetId,
-      range: `${safeSheetName}!1:1`,
-      valueInputOption: "USER_ENTERED",
-      requestBody: {
-        values: [mergedHeaders],
-      },
-    });
+    if (existingHeaders.length === 0) {
+      throw new Error(
+        "This sheet has no header row. Please add headers in row 1 first."
+      );
+    }
 
     let connection = await prisma.sheetConnection.findFirst({
       where: {
@@ -95,15 +85,14 @@ export async function POST(request: NextRequest) {
           spreadsheetId,
           spreadsheetName,
           sheetName,
-          templateKey,
           columns: {
-            create: template.columns.map((column, index) => ({
-              key: column.key,
-              label: column.label,
-              type: column.type as ColumnType,
-              required: column.required,
+            create: existingHeaders.map((header, index) => ({
+              key: header.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "").toLowerCase() || `col_${index}`,
+              label: header,
+              type: "TEXT" as any,
+              required: false,
               order: index,
-              isDefault: true,
+              isDefault: false,
             })),
           },
         },
@@ -115,8 +104,7 @@ export async function POST(request: NextRequest) {
       spreadsheetId,
       spreadsheetName,
       sheetName,
-      templateKey: connection.templateKey,
-      headers: mergedHeaders,
+      headers: existingHeaders,
     });
   } catch (error: any) {
     return NextResponse.json(

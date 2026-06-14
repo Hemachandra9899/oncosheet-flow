@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import PatientWizard from "@/components/PatientWizard";
 import { prisma } from "@/lib/prisma";
 import { getUserIdFromSession } from "@/lib/session";
-import { getTemplate } from "@/lib/templates";
 
 export const dynamic = "force-dynamic";
 
@@ -29,18 +28,10 @@ export default async function NewPatientPage({
     redirect("/dashboard");
   }
 
-  const template = getTemplate(connection.templateKey || "oncology_rt");
-
   return (
     <main className="min-h-dvh bg-[#F7F5EF] sm:flex sm:items-center sm:justify-center sm:px-4 sm:py-6">
       <div className="w-full sm:max-w-md">
-        <PatientWizard
-          sheetId={id}
-          templateKey={template.key}
-          templateName={template.name}
-          steps={template.steps}
-          columns={template.columns}
-        />
+        <PatientWizard sheetId={id} />
       </div>
     </main>
   );

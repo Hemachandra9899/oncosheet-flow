@@ -56,6 +56,7 @@ model SheetConnection {
   spreadsheetId   String
   spreadsheetName String?
   sheetName       String   @default("Patients")
+  templateKey     String   @default("oncology_rt")
   headerRow       Int      @default(1)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

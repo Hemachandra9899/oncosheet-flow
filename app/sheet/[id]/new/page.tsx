@@ -1,4 +1,10 @@
+import { redirect } from "next/navigation";
 import PatientWizard from "@/components/PatientWizard";
+import { prisma } from "@/lib/prisma";
+import { getUserIdFromSession } from "@/lib/session";
+import { getTemplate } from "@/lib/templates";
+
+export const dynamic = "force-dynamic";
 
 export default async function NewPatientPage({
   params,
@@ -6,11 +12,35 @@ export default async function NewPatientPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const userId = await getUserIdFromSession();
+
+  if (!userId) {
+    redirect("/");
+  }
+
+  const connection = await prisma.sheetConnection.findFirst({
+    where: {
+      id,
+      userId,
+    },
+  });
+
+  if (!connection) {
+    redirect("/dashboard");
+  }
+
+  const template = getTemplate(connection.templateKey || "oncology_rt");
 
   return (
-    <main className="min-h-dvh bg-gradient-to-br from-indigo-50 via-white to-lime-50 sm:flex sm:items-center sm:justify-center sm:px-4 sm:py-6">
+    <main className="min-h-dvh bg-[#F7F5EF] sm:flex sm:items-center sm:justify-center sm:px-4 sm:py-6">
       <div className="w-full sm:max-w-md">
-        <PatientWizard sheetId={id} />
+        <PatientWizard
+          sheetId={id}
+          templateKey={template.key}
+          templateName={template.name}
+          steps={template.steps}
+          columns={template.columns}
+        />
       </div>
     </main>
   );

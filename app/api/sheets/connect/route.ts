@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ColumnType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/session";
-import { DEFAULT_COLUMNS, mergeHeaders } from "@/lib/sheet-template";
+import { mergeHeaders } from "@/lib/sheet-template";
+import { getTemplate } from "@/lib/templates";
 import {
   extractSpreadsheetId,
   extractSheetGid,
@@ -16,6 +18,9 @@ export async function POST(request: NextRequest) {
   try {
     const userId = await requireUserId();
     const body = await request.json();
+
+    const templateKey = body.templateKey || "oncology_rt";
+    const template = getTemplate(templateKey);
 
     const spreadsheetUrl = body.spreadsheetUrl || body.spreadsheetId || "";
     const spreadsheetId = extractSpreadsheetId(spreadsheetUrl);
@@ -55,8 +60,8 @@ export async function POST(request: NextRequest) {
       range: `${safeSheetName}!1:1`,
     });
 
-    const existingHeaders = headerResult.data.values?.[0] || [];
-    const mergedHeaders = mergeHeaders(existingHeaders.map(String));
+    const existingHeaders = (headerResult.data.values?.[0] || []).map(String);
+    const mergedHeaders = mergeHeaders(existingHeaders, templateKey);
 
     await sheets.spreadsheets.values.update({
       spreadsheetId,
@@ -77,9 +82,7 @@ export async function POST(request: NextRequest) {
 
     if (connection) {
       connection = await prisma.sheetConnection.update({
-        where: {
-          id: connection.id,
-        },
+        where: { id: connection.id },
         data: {
           spreadsheetName,
           sheetName,
@@ -92,11 +95,12 @@ export async function POST(request: NextRequest) {
           spreadsheetId,
           spreadsheetName,
           sheetName,
+          templateKey,
           columns: {
-            create: DEFAULT_COLUMNS.map((column, index) => ({
+            create: template.columns.map((column, index) => ({
               key: column.key,
               label: column.label,
-              type: column.type,
+              type: column.type as ColumnType,
               required: column.required,
               order: index,
               isDefault: true,
@@ -111,6 +115,8 @@ export async function POST(request: NextRequest) {
       spreadsheetId,
       spreadsheetName,
       sheetName,
+      templateKey: connection.templateKey,
+      headers: mergedHeaders,
     });
   } catch (error: any) {
     return NextResponse.json(

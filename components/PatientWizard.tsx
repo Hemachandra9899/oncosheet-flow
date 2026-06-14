@@ -3,68 +3,26 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
 import { calculateBMI, getBMIGroup } from "@/lib/bmi";
+import type { TemplateColumn, TemplateStep } from "@/lib/templates";
 import { OptionButton } from "./OptionButton";
-
-type Step =
-  | { id: string; label: string; title: string; type: "text" | "number" | "date" | "textarea"; placeholder?: string }
-  | { id: string; label: string; title: string; type: "choice"; options: string[] }
-  | { id: string; label: string; title: string; type: "grade" }
-  | { id: string; label: string; title: string; type: "preBmi" | "postBmi" }
-  | { id: string; label: string; title: string; type: "review" };
-
-const steps: Step[] = [
-  { id: "patientId", label: "Patient", title: "Patient ID", type: "text", placeholder: "25-05976" },
-  { id: "patientName", label: "Patient", title: "Patient name", type: "text", placeholder: "Enter patient name" },
-  { id: "age", label: "Patient", title: "Age", type: "number", placeholder: "50" },
-  { id: "sex", label: "Patient", title: "Sex", type: "choice", options: ["Male", "Female"] },
-  { id: "primarySite", label: "Diagnosis", title: "Primary site", type: "choice", options: ["Ca Hypopharynx", "Ca Tongue", "Ca Bm", "Ca Oropharynx", "Ca Nasopharynx", "Ca Post Cricoid", "Other"] },
-  { id: "stage", label: "Diagnosis", title: "Stage", type: "text", placeholder: "T2N2M0" },
-  { id: "ecog", label: "Diagnosis", title: "ECOG", type: "choice", options: ["0", "1", "2", "3", "4"] },
-  { id: "preBmi", label: "Pre RT", title: "Pre RT weight, height and BMI", type: "preBmi" },
-  { id: "rtStarted", label: "RT", title: "RT started", type: "date" },
-  { id: "rtDoseGy", label: "RT", title: "RT dose", type: "choice", options: ["66gy 33#", "60gy 30#", "70gy 35#", "68gy 34#", "Other"] },
-  { id: "rtTech", label: "RT", title: "RT technique", type: "choice", options: ["IMRT", "RADICAL RT", "ADJRT IMRT", "Other"] },
-  { id: "rtEnded", label: "RT", title: "RT ended", type: "date" },
-  { id: "cctCycles", label: "Treatment", title: "CCT cycles", type: "text", placeholder: "3 cisplatin" },
-  { id: "ryles", label: "Treatment", title: "Ryles", type: "choice", options: ["Yes", "No"] },
-  { id: "postRtMucositis", label: "Toxicity", title: "Post RT mucositis", type: "grade" },
-  { id: "postRtDermatitis", label: "Toxicity", title: "Post RT dermatitis", type: "grade" },
-  { id: "postRtDys", label: "Toxicity", title: "Post RT dysphagia", type: "grade" },
-  { id: "postBmi", label: "Post RT", title: "Post RT weight and BMI", type: "postBmi" },
-  { id: "treatmentInterruptions", label: "Final", title: "Treatment interruptions", type: "choice", options: ["Yes", "No"] },
-  { id: "notes", label: "Final", title: "Notes", type: "textarea", placeholder: "Optional notes" },
-  { id: "review", label: "Review", title: "Review patient row", type: "review" }
-];
-
-const REVIEW_FIELDS = [
-  ["patientId", "Patient ID"],
-  ["patientName", "Patient Name"],
-  ["age", "Age"],
-  ["sex", "Sex"],
-  ["primarySite", "Primary Site"],
-  ["stage", "Stage"],
-  ["ecog", "ECOG"],
-  ["preRtWeightKg", "Pre RT Weight(kg)"],
-  ["heightCm", "Height(cm)"],
-  ["rtStarted", "RT Started"],
-  ["rtDoseGy", "RT Dose(Gy)"],
-  ["rtTech", "RT Tech"],
-  ["rtEnded", "RT Ended"],
-  ["cctCycles", "CCT Cycles"],
-  ["ryles", "Ryles"],
-  ["postRtMucositis", "Post RT Mucositis"],
-  ["postRtDermatitis", "Post RT Dermatitis"],
-  ["postRtDys", "Post RT Dys"],
-  ["postRtWeightKg", "Post RT Weight(kg)"],
-  ["treatmentInterruptions", "Treatment Interruptions"],
-  ["notes", "Notes"],
-] as const;
 
 function FieldShell({ children }: { children: React.ReactNode }) {
   return <div className="mt-7 space-y-4">{children}</div>;
 }
 
-export default function PatientWizard({ sheetId }: { sheetId: string }) {
+export default function PatientWizard({
+  sheetId,
+  templateKey,
+  templateName,
+  steps,
+  columns,
+}: {
+  sheetId: string;
+  templateKey: string;
+  templateName: string;
+  steps: TemplateStep[];
+  columns: TemplateColumn[];
+}) {
   const [index, setIndex] = useState(0);
   const [values, setValues] = useState<Record<string, any>>({});
   const [error, setError] = useState("");
@@ -75,12 +33,8 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
   const progress = Math.round(((index + 1) / steps.length) * 100);
 
   const preBmi = useMemo(
-    () => calculateBMI(Number(values.preRtWeightKg), Number(values.heightCm)),
-    [values.preRtWeightKg, values.heightCm]
-  );
-  const postBmi = useMemo(
-    () => calculateBMI(Number(values.postRtWeightKg), Number(values.heightCm)),
-    [values.postRtWeightKg, values.heightCm]
+    () => calculateBMI(Number(values.weightKg), Number(values.height)),
+    [values.weightKg, values.height]
   );
 
   function update(key: string, value: any) {
@@ -118,7 +72,7 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
     const res = await fetch(`/api/sheets/${sheetId}/submit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values)
+      body: JSON.stringify(values),
     });
     const data = await res.json();
     setSubmitting(false);
@@ -140,7 +94,7 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
       </div>
 
       <p className="mt-8 text-[11px] font-bold uppercase tracking-widest text-slate-400 sm:mt-10">
-        Question {index + 1} · {step.label}
+        Question {index + 1} &middot; {step.label}
       </p>
       <h1 className="mt-2 text-[2.2rem] font-black leading-[0.95] tracking-[-0.05em] text-[#07071E] sm:text-4xl">
         {step.title}
@@ -203,15 +157,15 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
           <div className="grid grid-cols-2 gap-3">
             <input
               type="number"
-              value={values.preRtWeightKg || ""}
-              onChange={(e) => update("preRtWeightKg", e.target.value)}
+              value={values.weightKg || ""}
+              onChange={(e) => update("weightKg", e.target.value)}
               placeholder="Weight kg"
               className="focus-ring rounded-[1.4rem] border-0 bg-white px-4 py-5 text-[16px] font-black text-slate-900 shadow-sm outline-none ring-1 ring-slate-200"
             />
             <input
               type="number"
-              value={values.heightCm || ""}
-              onChange={(e) => update("heightCm", e.target.value)}
+              value={values.height || ""}
+              onChange={(e) => update("height", e.target.value)}
               placeholder="Height cm"
               className="focus-ring rounded-[1.4rem] border-0 bg-white px-4 py-5 text-[16px] font-black text-slate-900 shadow-sm outline-none ring-1 ring-slate-200"
             />
@@ -224,45 +178,32 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
         </FieldShell>
       ) : null}
 
-      {step.type === "postBmi" ? (
-        <FieldShell>
-          <input
-            type="number"
-            value={values.postRtWeightKg || ""}
-            onChange={(e) => update("postRtWeightKg", e.target.value)}
-            placeholder="Post RT weight kg"
-            className="focus-ring w-full rounded-[1.4rem] border-0 bg-white px-4 py-5 text-[16px] font-black text-slate-900 shadow-sm outline-none ring-1 ring-slate-200"
-          />
-          <div className="rounded-[1.4rem] bg-lime-50 p-4 ring-1 ring-lime-100">
-            <p className="text-xs font-bold uppercase tracking-widest text-lime-600">Auto calculated</p>
-            <p className="mt-2 text-2xl font-bold text-lime-700">Post RT BMI: {postBmi ?? "—"}</p>
-          </div>
-        </FieldShell>
-      ) : null}
-
       {step.type === "review" ? (
         <FieldShell>
           <div className="max-h-72 overflow-auto rounded-[1.4rem] bg-white p-4 ring-1 ring-slate-200">
             <dl className="space-y-3 text-sm">
-              {REVIEW_FIELDS.map(([key, label]) => {
-                const value = values[key];
-                return (
-                  <div key={key} className="flex justify-between gap-4 border-b border-slate-200/70 pb-2 last:border-b-0">
-                    <dt className="font-semibold text-slate-500">{label}</dt>
+              {columns
+                .filter((column) => column.key !== "serialNo")
+                .map((column) => (
+                  <div key={column.key} className="flex justify-between gap-4 border-b border-slate-200/70 pb-2 last:border-b-0">
+                    <dt className="font-semibold text-slate-500">{column.label}</dt>
                     <dd className="text-right font-bold text-slate-900">
-                      {String(value ?? "—")}
+                      {String(values[column.key] ?? "—")}
                     </dd>
                   </div>
-                );
-              })}
-              <div className="flex justify-between gap-4 border-b border-slate-200/70 pb-2">
-                <dt className="font-semibold text-slate-500">Pre RT BMI</dt>
-                <dd className="text-right font-bold text-slate-900">{preBmi ?? "—"}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="font-semibold text-slate-500">Post RT BMI</dt>
-                <dd className="text-right font-bold text-slate-900">{postBmi ?? "—"}</dd>
-              </div>
+                ))}
+              {templateKey === "oncology_rt" ? (
+                <>
+                  <div className="flex justify-between gap-4 border-b border-slate-200/70 pb-2">
+                    <dt className="font-semibold text-slate-500">Pre RT BMI</dt>
+                    <dd className="text-right font-bold text-slate-900">{preBmi ?? "—"}</dd>
+                  </div>
+                  <div className="flex justify-between gap-4 border-b border-slate-200/70 pb-2">
+                    <dt className="font-semibold text-slate-500">BMI Group</dt>
+                    <dd className="text-right font-bold text-slate-900">{getBMIGroup(preBmi) || "—"}</dd>
+                  </div>
+                </>
+              ) : null}
             </dl>
           </div>
         </FieldShell>

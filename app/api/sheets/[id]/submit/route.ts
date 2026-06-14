@@ -18,6 +18,23 @@ function findHeader(headers: string[], candidates: string[]) {
   return headers.find((header) => normalizedCandidates.includes(normalize(header)));
 }
 
+function getRowValueForHeader(
+  rowValues: Record<string, any>,
+  header: string
+) {
+  if (Object.prototype.hasOwnProperty.call(rowValues, header)) {
+    return rowValues[header];
+  }
+
+  const normalizedHeader = normalize(header);
+
+  const matchedKey = Object.keys(rowValues).find(
+    (key) => normalize(key) === normalizedHeader
+  );
+
+  return matchedKey ? rowValues[matchedKey] : "";
+}
+
 function buildExactRowFromHeaders(
   headers: string[],
   rowValues: Record<string, any>,
@@ -36,8 +53,14 @@ function buildExactRowFromHeaders(
     "Height",
   ]);
 
-  const weight = weightHeader ? Number(rowValues[weightHeader]) : NaN;
-  const height = heightHeader ? Number(rowValues[heightHeader]) : NaN;
+  const weight = weightHeader
+    ? Number(getRowValueForHeader(rowValues, weightHeader))
+    : NaN;
+
+  const height = heightHeader
+    ? Number(getRowValueForHeader(rowValues, heightHeader))
+    : NaN;
+
   const preBmi = calculateBMI(weight, height);
 
   return headers.map((header) => {
@@ -48,14 +71,14 @@ function buildExactRowFromHeaders(
     }
 
     if (normalized === "pre rt bmi") {
-      return preBmi ?? rowValues[header] ?? "";
+      return preBmi ?? getRowValueForHeader(rowValues, header);
     }
 
     if (normalized === "bmi group") {
-      return preBmi ? getBMIGroup(preBmi) : rowValues[header] ?? "";
+      return preBmi ? getBMIGroup(preBmi) : getRowValueForHeader(rowValues, header);
     }
 
-    return rowValues[header] ?? "";
+    return getRowValueForHeader(rowValues, header);
   });
 }
 

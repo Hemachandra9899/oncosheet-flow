@@ -135,18 +135,19 @@ export default function PatientWizard({ sheetId }: { sheetId: string }) {
     const fieldSteps = headers
       .filter((header) => !shouldSkipHeader(header))
       .map((header) => {
-        const clean = header.replace(/\s+/g, " ").trim();
-        const type = inferStepType(clean);
-        const options = inferOptions(clean);
+        const rawHeader = header;
+        const displayHeader = header.replace(/\s+/g, " ").trim();
+        const type = inferStepType(displayHeader);
+        const options = inferOptions(displayHeader);
 
         return {
-          id: `field:${clean}`,
-          header: clean,
+          id: `field:${rawHeader}`,
+          header: rawHeader,
           label: "Sheet Column",
-          title: clean,
+          title: displayHeader,
           type,
           options,
-          placeholder: `Enter ${clean}`,
+          placeholder: `Enter ${displayHeader}`,
         } as FlowStep;
       });
 
